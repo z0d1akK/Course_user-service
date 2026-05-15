@@ -1,0 +1,21 @@
+databaseChangeLog:
+  - changeSet:
+      id: 004-add-payment-cards-indexes
+      author: zodiakk
+
+      changes:
+        - createIndex:
+            tableName: payment_cards
+            indexName: idx_payment_cards_user_id
+
+            columns:
+              - column:
+                  name: user_id
+
+        - createIndex:
+            tableName: payment_cards
+            indexName: idx_payment_cards_number
+
+            columns:
+              - column:
+                  name: number
