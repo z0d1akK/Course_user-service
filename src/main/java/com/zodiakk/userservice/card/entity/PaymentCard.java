@@ -8,20 +8,28 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
+
+import java.util.Objects;
 
 @Getter
 @Setter
 @Entity
 @Table(name = "payment_cards")
+@AllArgsConstructor
+@NoArgsConstructor
+@SuperBuilder
 public class PaymentCard extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(nullable = false, unique = true, length = 16)
+    @Column(nullable = false, length = 16, updatable = false)
     private String number;
 
     @Column(nullable = false)
@@ -32,4 +40,20 @@ public class PaymentCard extends BaseEntity {
 
     @Column(nullable = false)
     private Boolean active;
+
+    @Override
+    public final boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (o == null || getClass() != o.getClass()) return false;
+
+        PaymentCard card = (PaymentCard) o;
+
+        return getId() != null && Objects.equals(getId(), card.getId());
+    }
+
+    @Override
+    public final int hashCode() {
+        return Objects.hash(getId());
+    }
 }
