@@ -22,7 +22,7 @@ public class CreateUserRequestDto {
     private String surname;
 
     @NotNull(message = ValidationMessages.USER_BIRTH_DATE_REQUIRED)
-    @Past(message = ValidationMessages.USER_BIRTH_DATE_PAST)
+    @PastOrPresent(message = ValidationMessages.USER_BIRTH_DATE_PAST)
     private LocalDate birthDate;
 
     @NotBlank(message = ValidationMessages.USER_EMAIL_REQUIRED)
