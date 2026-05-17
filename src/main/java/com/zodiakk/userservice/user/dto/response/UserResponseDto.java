@@ -1,6 +1,7 @@
 package com.zodiakk.userservice.user.dto.response;
 
 import com.zodiakk.userservice.card.dto.response.PaymentCardShortResponseDto;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -13,22 +14,31 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Schema(description = "Full user response DTO")
 public class UserResponseDto {
 
+    @Schema(example = "e73dcc73-e1db-4c3a-9246-0e1c2de79074")
     private UUID id;
 
+    @Schema(example = "name")
     private String name;
 
+    @Schema(example = "surname")
     private String surname;
 
+    @Schema(example = "2005-05-05")
     private LocalDate birthDate;
 
+    @Schema(example = "user@gmail.com")
     private String email;
 
+    @Schema(example = "true")
     private Boolean active;
 
+    @Schema(example = "2026-05-16T15:00:00")
     private LocalDateTime createdAt;
 
+    @Schema(example = "2026-05-16T15:30:00")
     private LocalDateTime updatedAt;
 
     private List<PaymentCardShortResponseDto> paymentCards;
