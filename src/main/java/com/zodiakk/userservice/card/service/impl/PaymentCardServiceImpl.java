@@ -127,4 +127,16 @@ public class PaymentCardServiceImpl implements PaymentCardService {
 
         paymentCardRepository.deactivate(id);
     }
+
+    @Override
+    @Transactional
+    public void delete(UUID id) {
+        PaymentCard paymentCard = paymentCardRepository.findById(id)
+                .orElseThrow(() -> new PaymentCardNotFoundException(id));
+
+        User user = paymentCard.getUser();
+
+        user.removePaymentCard(paymentCard);
+        userRepository.save(user);
+    }
 }

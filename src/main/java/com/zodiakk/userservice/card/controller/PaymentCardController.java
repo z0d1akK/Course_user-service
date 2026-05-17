@@ -150,4 +150,18 @@ public class PaymentCardController {
         paymentCardService.deactivate(id);
         return ResponseEntity.noContent().build();
     }
+
+    @Operation(summary = "Delete payment card", description = "Deletes payment card by id")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Payment card successfully deleted"),
+            @ApiResponse(responseCode = "404", description = "Payment card not found",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            )
+    })
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+        paymentCardService.delete(id);
+
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -98,6 +98,15 @@ public class UserServiceImpl implements UserService {
         userRepository.deactivate(id);
     }
 
+    @Override
+    @Transactional
+    public void delete(UUID id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
+
+        userRepository.delete(user);
+    }
+
     private Specification<User> buildSpecification(UserFilterRequestDto filter) {
         return Specification.allOf(
                 UserSpecification.hasName(filter.getName()),

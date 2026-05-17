@@ -33,4 +33,6 @@ public interface PaymentCardService {
     void activate(UUID id);
 
     void deactivate(UUID id);
+
+    void delete(UUID id);
 }

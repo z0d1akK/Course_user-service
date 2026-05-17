@@ -122,4 +122,18 @@ public class UserController {
         userService.deactivate(id);
         return ResponseEntity.noContent().build();
     }
+
+    @Operation(summary = "Delete user", description = "Deletes user by id with all related payment cards")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "User successfully deleted"),
+            @ApiResponse(responseCode = "404", description = "User not found",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            )
+    })
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+        userService.delete(id);
+
+        return ResponseEntity.noContent().build();
+    }
 }
