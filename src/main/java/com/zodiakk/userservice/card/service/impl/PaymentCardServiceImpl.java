@@ -10,10 +10,13 @@ import com.zodiakk.userservice.card.exception.PaymentCardNotFoundException;
 import com.zodiakk.userservice.card.mapper.PaymentCardMapper;
 import com.zodiakk.userservice.card.repository.PaymentCardRepository;
 import com.zodiakk.userservice.card.service.PaymentCardService;
+import com.zodiakk.userservice.common.cache.CacheNames;
 import com.zodiakk.userservice.user.entity.User;
 import com.zodiakk.userservice.user.exception.UserNotFoundException;
 import com.zodiakk.userservice.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -36,8 +39,11 @@ public class PaymentCardServiceImpl implements PaymentCardService {
 
     private final PaymentCardMapper paymentCardMapper;
 
+    private final CacheManager cacheManager;
+
     @Override
     @Transactional
+    @CacheEvict(value = CacheNames.USERS, key = "#userId")
     public PaymentCardResponseDto create(UUID userId, CreatePaymentCardRequestDto request) {
 
         //TODO Make util with getting current user
@@ -79,7 +85,7 @@ public class PaymentCardServiceImpl implements PaymentCardService {
 
     @Override
     public List<PaymentCardShortResponseDto> getAllShortByUserId(UUID userId) {
-        if (!userRepository.existsById(userId)) throw new UserNotFoundException(userId);
+        validateUserExists(userId);
         return paymentCardRepository.findAllByUserId(userId).stream()
                 .map(paymentCardMapper::toShortResponse)
                 .collect(Collectors.toList());
@@ -93,7 +99,7 @@ public class PaymentCardServiceImpl implements PaymentCardService {
 
     @Override
     public List<PaymentCardResponseDto> getAllByUserId(UUID userId) {
-        if (!userRepository.existsById(userId)) throw new UserNotFoundException(userId);
+        validateUserExists(userId);
         return paymentCardRepository.findAllByUserId(userId).stream()
                 .map(paymentCardMapper::toResponse)
                 .collect(Collectors.toList());
@@ -109,23 +115,31 @@ public class PaymentCardServiceImpl implements PaymentCardService {
 
         PaymentCard updatedPaymentCard = paymentCardRepository.save(paymentCard);
 
+        evictUserCache(paymentCard.getUser().getId());
+
         return paymentCardMapper.toResponse(updatedPaymentCard);
     }
 
     @Override
     @Transactional
     public void activate(UUID id) {
-        if (!paymentCardRepository.existsById(id)) throw new PaymentCardNotFoundException(id);
+        PaymentCard paymentCard = paymentCardRepository.findById(id)
+                .orElseThrow(() -> new PaymentCardNotFoundException(id));
 
         paymentCardRepository.activate(id);
+
+        evictUserCache(paymentCard.getUser().getId());
     }
 
     @Override
     @Transactional
     public void deactivate(UUID id) {
-        if (!paymentCardRepository.existsById(id)) throw new PaymentCardNotFoundException(id);
+        PaymentCard paymentCard = paymentCardRepository.findById(id)
+                .orElseThrow(() -> new PaymentCardNotFoundException(id));
 
         paymentCardRepository.deactivate(id);
+
+        evictUserCache(paymentCard.getUser().getId());
     }
 
     @Override
@@ -136,7 +150,27 @@ public class PaymentCardServiceImpl implements PaymentCardService {
 
         User user = paymentCard.getUser();
 
+        UUID userId = user.getId();
+
         user.removePaymentCard(paymentCard);
+
         userRepository.save(user);
+
+        evictUserCache(userId);
+    }
+
+    private void validateUserExists(UUID userId) {
+        if (!userRepository.existsById(userId)) {
+            throw new UserNotFoundException(userId);
+        }
+    }
+
+    private void evictUserCache(UUID userId) {
+        if (cacheManager.getCache(CacheNames.USERS) != null) {
+            cacheManager.getCache(CacheNames.USERS).evict(userId);
+        }
+        if (cacheManager.getCache(CacheNames.USERS_SHORT) != null) {
+            cacheManager.getCache(CacheNames.USERS_SHORT).evict(userId);
+        }
     }
 }
