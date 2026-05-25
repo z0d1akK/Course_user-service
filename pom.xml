@@ -8,7 +8,7 @@
         <version>3.5.14</version>
         <relativePath/>
     </parent>
-    <groupId>com.zodiakk</groupId>
+    <groupId>com.innowise</groupId>
     <artifactId>userservice</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>user-service</name>

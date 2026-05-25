@@ -6,7 +6,10 @@ databaseChangeLog:
       file: db/changelog/changes/002-create-payment-cards-table.yaml
 
   - include:
-      file: db/changelog/changes/003-add-payment-cards-indexes.yaml
+      file: db/changelog/changes/003-add-users-indexes.yaml
 
   - include:
-      file: db/changelog/changes/004-add-constraints.yaml
+      file: db/changelog/changes/004-add-payment-cards-indexes.yaml
+
+  - include:
+      file: db/changelog/changes/005-add-constraints.yaml
