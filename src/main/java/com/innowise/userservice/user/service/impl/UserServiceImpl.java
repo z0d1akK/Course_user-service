@@ -71,6 +71,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Page<UserResponseDto> getAll(UserFilterRequestDto filter, Pageable pageable) {
+        if (isFilterEmpty(filter)) {
+            return userRepository.findAllWithCards(pageable).map(userMapper::toResponse);
+        }
+
         Specification<User> specification = buildSpecification(filter);
 
         return userRepository.findAll(specification, pageable).map(userMapper::toResponse);
@@ -128,5 +132,11 @@ public class UserServiceImpl implements UserService {
                 UserSpecification.hasSurname(filter.getSurname()),
                 UserSpecification.hasActive(filter.getActive())
         );
+    }
+
+    private boolean isFilterEmpty(UserFilterRequestDto filter) {
+        return filter == null || (filter.getName() == null &&
+                filter.getSurname() == null &&
+                filter.getActive() == null);
     }
 }

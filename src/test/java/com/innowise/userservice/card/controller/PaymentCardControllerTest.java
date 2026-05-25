@@ -47,8 +47,7 @@ public class PaymentCardControllerTest extends AbstractIntegrationTest {
 
         CreatePaymentCardRequestDto request = PaymentCardTestDataFactory.createPaymentCardRequest();
 
-        mockMvc.perform(post("/api/payment-cards")
-                        .param("userId", user.getId().toString())
+        mockMvc.perform(post("/api/users/{userId}/payment-cards", user.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -62,8 +61,7 @@ public class PaymentCardControllerTest extends AbstractIntegrationTest {
     void create_shouldReturn404WhenUserNotFound() throws Exception {
         CreatePaymentCardRequestDto request = PaymentCardTestDataFactory.createPaymentCardRequest();
 
-        mockMvc.perform(post("/api/payment-cards")
-                        .param("userId", UUID.randomUUID().toString())
+        mockMvc.perform(post("/api/users/{userId}/payment-cards", UUID.randomUUID())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound());
@@ -80,7 +78,7 @@ public class PaymentCardControllerTest extends AbstractIntegrationTest {
                         .expirationDate("99/99")
                         .build();
 
-        mockMvc.perform(post("/api/payment-cards")
+        mockMvc.perform(post("/api/users/{userId}/payment-cards", user.getId())
                         .param("userId", user.getId().toString())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -162,7 +160,7 @@ public class PaymentCardControllerTest extends AbstractIntegrationTest {
 
         paymentCardRepository.save(PaymentCardTestDataFactory.createPaymentCard(user));
 
-        mockMvc.perform(get("/api/payment-cards/by-user/{userId}", user.getId()))
+        mockMvc.perform(get("/api/users/{userId}/payment-cards", user.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)));
     }
@@ -170,7 +168,7 @@ public class PaymentCardControllerTest extends AbstractIntegrationTest {
     @Test
     @DisplayName("getAllByUserId should return 404 when user not found")
     void getAllByUserId_shouldReturn404WhenUserNotFound() throws Exception {
-        mockMvc.perform(get("/api/payment-cards/by-user/{userId}", UUID.randomUUID()))
+        mockMvc.perform(get("/api/users/{userId}/payment-cards", UUID.randomUUID()))
                 .andExpect(status().isNotFound());
     }
 
@@ -181,7 +179,7 @@ public class PaymentCardControllerTest extends AbstractIntegrationTest {
 
         paymentCardRepository.save(PaymentCardTestDataFactory.createPaymentCard(user));
 
-        mockMvc.perform(get("/api/payment-cards/short/by-user/{userId}", user.getId()))
+        mockMvc.perform(get("/api/users/{userId}/payment-cards/short", user.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)));
     }
@@ -189,7 +187,7 @@ public class PaymentCardControllerTest extends AbstractIntegrationTest {
     @Test
     @DisplayName("getAllShortByUserId should return 404 when user not found")
     void getAllShortByUserId_shouldReturn404WhenUserNotFound() throws Exception {
-        mockMvc.perform(get("/api/payment-cards/short/by-user/{userId}", UUID.randomUUID()))
+        mockMvc.perform(get("/api/users/{userId}/payment-cards/short", UUID.randomUUID()))
                 .andExpect(status().isNotFound());
     }
 

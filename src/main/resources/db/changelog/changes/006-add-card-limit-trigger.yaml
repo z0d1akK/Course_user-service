@@ -1,0 +1,31 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 006-add-card-limit-trigger
+      author: zodiakk
+      changes:
+        - sql:
+            dbms: postgresql
+            splitStatements: false
+            sql: |
+              CREATE OR REPLACE FUNCTION check_card_limit()
+              RETURNS TRIGGER AS $BODY$
+              BEGIN
+                IF (SELECT COUNT(*) FROM payment_cards WHERE user_id = NEW.user_id) >= 5 THEN
+                  RAISE EXCEPTION 'User % has reached maximum cards limit of 5', NEW.user_id;
+                END IF;
+                RETURN NEW;
+              END;
+              $BODY$ LANGUAGE plpgsql;
+
+              DROP TRIGGER IF EXISTS enforce_card_limit ON payment_cards;
+              
+              CREATE TRIGGER enforce_card_limit
+              BEFORE INSERT ON payment_cards
+              FOR EACH ROW
+              EXECUTE FUNCTION check_card_limit();
+      rollback:
+        - sql:
+            sql: |
+              DROP TRIGGER IF EXISTS enforce_card_limit ON payment_cards;
+              DROP FUNCTION IF EXISTS check_card_limit();

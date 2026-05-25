@@ -14,7 +14,7 @@ services:
       - "${SERVER_PORT}:${SERVER_PORT}"
 
     environment:
-      SPRING_PROFILES_ACTIVE: docker
+      SPRING_PROFILES_ACTIVE: ${ACTIVE_PROFILE}
 
       SERVER_PORT: ${SERVER_PORT}
 

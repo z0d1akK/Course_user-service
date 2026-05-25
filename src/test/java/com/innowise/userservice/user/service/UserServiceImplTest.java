@@ -263,19 +263,24 @@ public class UserServiceImplTest {
     void activateDeactivate_shouldWorkCorrectly(boolean activate) {
         UUID userId = UUID.randomUUID();
 
-        when(userRepository.existsById(userId)).thenReturn(true);
+        User user = UserTestDataFactory.createUser();
+        user.setId(userId);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepository.save(user)).thenReturn(user);
 
         if (activate) {
             userService.activate(userId);
 
-            verify(userRepository).activate(userId);
+            assertThat(user.getActive()).isTrue();
         } else {
             userService.deactivate(userId);
 
-            verify(userRepository).deactivate(userId);
+            assertThat(user.getActive()).isFalse();
         }
 
-        verify(userRepository).existsById(userId);
+        verify(userRepository).findById(userId);
+        verify(userRepository).save(user);
     }
 
     @ParameterizedTest
@@ -284,21 +289,18 @@ public class UserServiceImplTest {
     void activateDeactivate_shouldThrowExceptionWhenUserNotFound(boolean activate) {
         UUID userId = UUID.randomUUID();
 
-        when(userRepository.existsById(userId)).thenReturn(false);
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         if (activate) {
             assertThatThrownBy(() -> userService.activate(userId))
                     .isInstanceOf(UserNotFoundException.class);
-
-            verify(userRepository, never()).activate(any());
         } else {
             assertThatThrownBy(() -> userService.deactivate(userId))
                     .isInstanceOf(UserNotFoundException.class);
-
-            verify(userRepository, never()).deactivate(any());
         }
 
-        verify(userRepository).existsById(userId);
+        verify(userRepository).findById(userId);
+        verify(userRepository, never()).save(any());
     }
 
     @Test

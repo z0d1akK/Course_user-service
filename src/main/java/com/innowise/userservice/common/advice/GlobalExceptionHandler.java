@@ -18,6 +18,8 @@ import java.util.List;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    private static final String INTERNAL_SERVER_ERROR_MESSAGE = "An unexpected error occurred. Please try again later.";
+
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ApiErrorResponse> handleNotFound(ResourceNotFoundException ex) {
         ApiErrorResponse response = ApiErrorResponse.builder()
@@ -65,7 +67,7 @@ public class GlobalExceptionHandler {
         ApiErrorResponse response = ApiErrorResponse.builder()
                         .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
                         .error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase())
-                        .message(ex.getMessage())
+                        .message(INTERNAL_SERVER_ERROR_MESSAGE)
                         .timestamp(LocalDateTime.now())
                         .build();
 

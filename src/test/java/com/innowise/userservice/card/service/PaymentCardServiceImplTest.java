@@ -408,11 +408,11 @@ public class PaymentCardServiceImplTest {
         if (activate) {
             paymentCardService.activate(cardId);
 
-            verify(paymentCardRepository).activate(cardId);
+            assertThat(paymentCard.getActive()).isTrue();
         } else {
             paymentCardService.deactivate(cardId);
 
-            verify(paymentCardRepository).deactivate(cardId);
+            assertThat(paymentCard.getActive()).isFalse();
         }
 
         verify(usersCache).evict(user.getId());
@@ -431,14 +431,10 @@ public class PaymentCardServiceImplTest {
             assertThatThrownBy(() ->
                     paymentCardService.activate(cardId))
                     .isInstanceOf(PaymentCardNotFoundException.class);
-
-            verify(paymentCardRepository, never()).activate(any());
         } else {
             assertThatThrownBy(() ->
                     paymentCardService.deactivate(cardId))
                     .isInstanceOf(PaymentCardNotFoundException.class);
-
-            verify(paymentCardRepository, never()).deactivate(any());
         }
     }
 

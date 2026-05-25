@@ -17,6 +17,7 @@ import com.innowise.userservice.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -57,9 +58,13 @@ public class PaymentCardServiceImpl implements PaymentCardService {
 
         user.addPaymentCard(paymentCard);
 
-        PaymentCard savedPaymentCard = paymentCardRepository.save(paymentCard);
+        try {
+            PaymentCard savedPaymentCard = paymentCardRepository.save(paymentCard);
 
-        return paymentCardMapper.toResponse(savedPaymentCard);
+            return paymentCardMapper.toResponse(savedPaymentCard);
+        } catch (DataIntegrityViolationException e) {
+            throw new MaxCardsLimitException(userId);
+        }
     }
 
     @Override
