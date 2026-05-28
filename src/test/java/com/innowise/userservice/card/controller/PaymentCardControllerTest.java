@@ -6,6 +6,7 @@ import com.innowise.userservice.card.entity.PaymentCard;
 import com.innowise.userservice.card.repository.PaymentCardRepository;
 import com.innowise.userservice.card.testclasses.PaymentCardTestDataFactory;
 import com.innowise.userservice.common.AbstractIntegrationTest;
+import com.innowise.userservice.common.annotation.WithMockCustomUser;
 import com.innowise.userservice.user.entity.User;
 import com.innowise.userservice.user.repository.UserRepository;
 import com.innowise.userservice.user.testclasses.UserTestDataFactory;
@@ -42,6 +43,7 @@ public class PaymentCardControllerTest extends AbstractIntegrationTest {
 
     @Test
     @DisplayName("create should create payment card successfully")
+    @WithMockCustomUser(role = "ROLE_ADMIN")
     void create_shouldCreatePaymentCardSuccessfully() throws Exception {
         User user = userRepository.save(UserTestDataFactory.createUser());
 
@@ -58,6 +60,7 @@ public class PaymentCardControllerTest extends AbstractIntegrationTest {
 
     @Test
     @DisplayName("create should return 404 when user not found")
+    @WithMockCustomUser(role = "ROLE_ADMIN")
     void create_shouldReturn404WhenUserNotFound() throws Exception {
         CreatePaymentCardRequestDto request = PaymentCardTestDataFactory.createPaymentCardRequest();
 
@@ -69,6 +72,7 @@ public class PaymentCardControllerTest extends AbstractIntegrationTest {
 
     @Test
     @DisplayName("create should return 400 when request invalid")
+    @WithMockCustomUser
     void create_shouldReturn400WhenRequestInvalid() throws Exception {
         User user = userRepository.save(UserTestDataFactory.createUser());
 
@@ -87,6 +91,7 @@ public class PaymentCardControllerTest extends AbstractIntegrationTest {
 
     @Test
     @DisplayName("getById should return payment card successfully")
+    @WithMockCustomUser(role = "ROLE_ADMIN")
     void getById_shouldReturnPaymentCardSuccessfully() throws Exception {
         User user = userRepository.save(UserTestDataFactory.createUser());
 
@@ -102,6 +107,7 @@ public class PaymentCardControllerTest extends AbstractIntegrationTest {
 
     @Test
     @DisplayName("getById should return 404 when payment card not found")
+    @WithMockCustomUser(role = "ROLE_ADMIN")
     void getById_shouldReturn404WhenPaymentCardNotFound() throws Exception {
         mockMvc.perform(get("/api/payment-cards/{id}", UUID.randomUUID()))
                 .andExpect(status().isNotFound());
@@ -109,6 +115,7 @@ public class PaymentCardControllerTest extends AbstractIntegrationTest {
 
     @Test
     @DisplayName("getShortById should return short payment card successfully")
+    @WithMockCustomUser(role = "ROLE_ADMIN")
     void getShortById_shouldReturnShortPaymentCardSuccessfully() throws Exception {
         User user = userRepository.save(UserTestDataFactory.createUser());
 
@@ -124,6 +131,7 @@ public class PaymentCardControllerTest extends AbstractIntegrationTest {
 
     @Test
     @DisplayName("getShortById should return 404 when payment card not found")
+    @WithMockCustomUser(role = "ROLE_ADMIN")
     void getShortById_shouldReturn404WhenPaymentCardNotFound() throws Exception {
         mockMvc.perform(get("/api/payment-cards/{id}/short", UUID.randomUUID()))
                 .andExpect(status().isNotFound());
@@ -131,6 +139,7 @@ public class PaymentCardControllerTest extends AbstractIntegrationTest {
 
     @Test
     @DisplayName("getAll should return payment cards page")
+    @WithMockCustomUser(role = "ROLE_ADMIN")
     void getAll_shouldReturnPaymentCardsPage() throws Exception {
         User user = userRepository.save(UserTestDataFactory.createUser());
 
@@ -143,6 +152,7 @@ public class PaymentCardControllerTest extends AbstractIntegrationTest {
 
     @Test
     @DisplayName("getAllShort should return short payment cards page")
+    @WithMockCustomUser(role = "ROLE_ADMIN")
     void getAllShort_shouldReturnShortPaymentCardsPage() throws Exception {
         User user = userRepository.save(UserTestDataFactory.createUser());
 
@@ -155,6 +165,7 @@ public class PaymentCardControllerTest extends AbstractIntegrationTest {
 
     @Test
     @DisplayName("getAllByUserId should return payment cards successfully")
+    @WithMockCustomUser(role = "ROLE_ADMIN")
     void getAllByUserId_shouldReturnPaymentCardsSuccessfully() throws Exception {
         User user = userRepository.save(UserTestDataFactory.createUser());
 
@@ -167,6 +178,7 @@ public class PaymentCardControllerTest extends AbstractIntegrationTest {
 
     @Test
     @DisplayName("getAllByUserId should return 404 when user not found")
+    @WithMockCustomUser(role = "ROLE_ADMIN")
     void getAllByUserId_shouldReturn404WhenUserNotFound() throws Exception {
         mockMvc.perform(get("/api/users/{userId}/payment-cards", UUID.randomUUID()))
                 .andExpect(status().isNotFound());
@@ -174,6 +186,7 @@ public class PaymentCardControllerTest extends AbstractIntegrationTest {
 
     @Test
     @DisplayName("getAllShortByUserId should return short payment cards successfully")
+    @WithMockCustomUser(role = "ROLE_ADMIN")
     void getAllShortByUserId_shouldReturnShortPaymentCardsSuccessfully() throws Exception {
         User user = userRepository.save(UserTestDataFactory.createUser());
 
@@ -186,6 +199,7 @@ public class PaymentCardControllerTest extends AbstractIntegrationTest {
 
     @Test
     @DisplayName("getAllShortByUserId should return 404 when user not found")
+    @WithMockCustomUser(role = "ROLE_ADMIN")
     void getAllShortByUserId_shouldReturn404WhenUserNotFound() throws Exception {
         mockMvc.perform(get("/api/users/{userId}/payment-cards/short", UUID.randomUUID()))
                 .andExpect(status().isNotFound());
@@ -193,6 +207,7 @@ public class PaymentCardControllerTest extends AbstractIntegrationTest {
 
     @Test
     @DisplayName("update should update payment card successfully")
+    @WithMockCustomUser(role = "ROLE_ADMIN")
     void update_shouldUpdatePaymentCardSuccessfully() throws Exception {
         User user = userRepository.save(UserTestDataFactory.createUser());
 
@@ -210,6 +225,7 @@ public class PaymentCardControllerTest extends AbstractIntegrationTest {
 
     @Test
     @DisplayName("update should return 404 when payment card not found")
+    @WithMockCustomUser(role = "ROLE_ADMIN")
     void update_shouldReturn404WhenPaymentCardNotFound() throws Exception {
         UpdatePaymentCardRequestDto request = PaymentCardTestDataFactory.updatePaymentCardRequest();
 
@@ -221,6 +237,7 @@ public class PaymentCardControllerTest extends AbstractIntegrationTest {
 
     @Test
     @DisplayName("update should return 400 when request invalid")
+    @WithMockCustomUser
     void update_shouldReturn400WhenRequestInvalid() throws Exception {
         User user = userRepository.save(UserTestDataFactory.createUser());
 
@@ -241,6 +258,7 @@ public class PaymentCardControllerTest extends AbstractIntegrationTest {
 
     @Test
     @DisplayName("activate should activate payment card")
+    @WithMockCustomUser(role = "ROLE_ADMIN")
     void activate_shouldActivatePaymentCard() throws Exception {
         User user = userRepository.save(UserTestDataFactory.createUser());
 
@@ -259,6 +277,7 @@ public class PaymentCardControllerTest extends AbstractIntegrationTest {
 
     @Test
     @DisplayName("activate should return 404 when payment card not found")
+    @WithMockCustomUser(role = "ROLE_ADMIN")
     void activate_shouldReturn404WhenPaymentCardNotFound() throws Exception {
         mockMvc.perform(patch("/api/payment-cards/{id}/activate", UUID.randomUUID()))
                 .andExpect(status().isNotFound());
@@ -266,6 +285,7 @@ public class PaymentCardControllerTest extends AbstractIntegrationTest {
 
     @Test
     @DisplayName("deactivate should deactivate payment card")
+    @WithMockCustomUser(role = "ROLE_ADMIN")
     void deactivate_shouldDeactivatePaymentCard() throws Exception {
         User user = userRepository.save(UserTestDataFactory.createUser());
 
@@ -281,6 +301,7 @@ public class PaymentCardControllerTest extends AbstractIntegrationTest {
 
     @Test
     @DisplayName("deactivate should return 404 when payment card not found")
+    @WithMockCustomUser(role = "ROLE_ADMIN")
     void deactivate_shouldReturn404WhenPaymentCardNotFound() throws Exception {
         mockMvc.perform(patch("/api/payment-cards/{id}/deactivate", UUID.randomUUID()))
                 .andExpect(status().isNotFound());
@@ -288,6 +309,7 @@ public class PaymentCardControllerTest extends AbstractIntegrationTest {
 
     @Test
     @DisplayName("delete should delete payment card successfully")
+    @WithMockCustomUser(role = "ROLE_ADMIN")
     void delete_shouldDeletePaymentCardSuccessfully() throws Exception {
         User user = userRepository.save(UserTestDataFactory.createUser());
 
@@ -301,6 +323,7 @@ public class PaymentCardControllerTest extends AbstractIntegrationTest {
 
     @Test
     @DisplayName("delete should return 404 when payment card not found")
+    @WithMockCustomUser(role = "ROLE_ADMIN")
     void delete_shouldReturn404WhenPaymentCardNotFound() throws Exception {
         mockMvc.perform(delete("/api/payment-cards/{id}", UUID.randomUUID()))
                 .andExpect(status().isNotFound());

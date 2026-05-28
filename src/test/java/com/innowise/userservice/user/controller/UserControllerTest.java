@@ -1,6 +1,7 @@
 package com.innowise.userservice.user.controller;
 
 import com.innowise.userservice.common.AbstractIntegrationTest;
+import com.innowise.userservice.common.annotation.WithMockCustomUser;
 import com.innowise.userservice.user.dto.request.CreateUserRequestDto;
 import com.innowise.userservice.user.dto.request.UpdateUserRequestDto;
 import com.innowise.userservice.user.entity.User;
@@ -49,6 +50,7 @@ public class UserControllerTest extends AbstractIntegrationTest {
 
     @Test
     @DisplayName("getById should return user successfully")
+    @WithMockCustomUser(role = "ROLE_ADMIN")
     void getById_shouldReturnUserSuccessfully() throws Exception {
         User user = userRepository.save(UserTestDataFactory.createUser());
 
@@ -60,6 +62,7 @@ public class UserControllerTest extends AbstractIntegrationTest {
 
     @Test
     @DisplayName("getById should return 404 when user not found")
+    @WithMockCustomUser(role = "ROLE_ADMIN")
     void getById_shouldReturn404WhenUserNotFound() throws Exception {
         mockMvc.perform(get("/api/users/{id}", UUID.randomUUID()))
                 .andExpect(status().isNotFound());
@@ -67,6 +70,7 @@ public class UserControllerTest extends AbstractIntegrationTest {
 
     @Test
     @DisplayName("getShortById should return short user successfully")
+    @WithMockCustomUser(role = "ROLE_ADMIN")
     void getShortById_shouldReturnShortUserSuccessfully() throws Exception {
         User user = userRepository.save(UserTestDataFactory.createUser());
 
@@ -78,6 +82,7 @@ public class UserControllerTest extends AbstractIntegrationTest {
 
     @Test
     @DisplayName("getShortById should return 404 when user not found")
+    @WithMockCustomUser(role = "ROLE_ADMIN")
     void getShortById_shouldReturn404WhenUserNotFound() throws Exception {
         mockMvc.perform(get("/api/users/{id}/short", UUID.randomUUID()))
                 .andExpect(status().isNotFound());
@@ -85,6 +90,7 @@ public class UserControllerTest extends AbstractIntegrationTest {
 
     @Test
     @DisplayName("getAll should return users page")
+    @WithMockCustomUser(role = "ROLE_ADMIN")
     void getAll_shouldReturnUsersPage() throws Exception {
         userRepository.save(UserTestDataFactory.createUser());
 
@@ -95,6 +101,7 @@ public class UserControllerTest extends AbstractIntegrationTest {
 
     @Test
     @DisplayName("getAllShort should return short users page")
+    @WithMockCustomUser(role = "ROLE_ADMIN")
     void getAllShort_shouldReturnShortUsersPage() throws Exception {
         userRepository.save(UserTestDataFactory.createUser());
 
@@ -105,6 +112,7 @@ public class UserControllerTest extends AbstractIntegrationTest {
 
     @Test
     @DisplayName("update should update user successfully")
+    @WithMockCustomUser(role = "ROLE_ADMIN")
     void update_shouldUpdateUserSuccessfully() throws Exception {
         User user = userRepository.save(UserTestDataFactory.createUser());
 
@@ -125,6 +133,7 @@ public class UserControllerTest extends AbstractIntegrationTest {
 
     @Test
     @DisplayName("update should return 404 when user not found")
+    @WithMockCustomUser(role = "ROLE_ADMIN")
     void update_shouldReturn404WhenUserNotFound() throws Exception {
         UpdateUserRequestDto request = UserTestDataFactory.updateUserRequest();
 
@@ -136,6 +145,7 @@ public class UserControllerTest extends AbstractIntegrationTest {
 
     @Test
     @DisplayName("update should return 400 when request invalid")
+    @WithMockCustomUser
     void update_shouldReturn400WhenRequestInvalid() throws Exception {
         User user = userRepository.save(UserTestDataFactory.createUser());
 
@@ -153,6 +163,7 @@ public class UserControllerTest extends AbstractIntegrationTest {
 
     @Test
     @DisplayName("delete should delete user successfully")
+    @WithMockCustomUser(role = "ROLE_ADMIN")
     void delete_shouldDeleteUserSuccessfully() throws Exception {
         User user = userRepository.save(UserTestDataFactory.createUser());
 
@@ -164,6 +175,7 @@ public class UserControllerTest extends AbstractIntegrationTest {
 
     @Test
     @DisplayName("delete should return 404 when user not found")
+    @WithMockCustomUser(role = "ROLE_ADMIN")
     void delete_shouldReturn404WhenUserNotFound() throws Exception {
         mockMvc.perform(delete("/api/users/{id}", UUID.randomUUID()))
                 .andExpect(status().isNotFound());
@@ -171,6 +183,7 @@ public class UserControllerTest extends AbstractIntegrationTest {
 
     @Test
     @DisplayName("activate should activate user")
+    @WithMockCustomUser(role = "ROLE_ADMIN")
     void activate_shouldActivateUser() throws Exception {
         User user = UserTestDataFactory.createUser();
         user.setActive(false);
@@ -187,6 +200,7 @@ public class UserControllerTest extends AbstractIntegrationTest {
 
     @Test
     @DisplayName("activate should return 404 when user not found")
+    @WithMockCustomUser(role = "ROLE_ADMIN")
     void activate_shouldReturn404WhenUserNotFound() throws Exception {
         mockMvc.perform(patch("/api/users/{id}/activate", UUID.randomUUID()))
                 .andExpect(status().isNotFound());
@@ -194,6 +208,7 @@ public class UserControllerTest extends AbstractIntegrationTest {
 
     @Test
     @DisplayName("deactivate should deactivate user")
+    @WithMockCustomUser(role = "ROLE_ADMIN")
     void deactivate_shouldDeactivateUser() throws Exception {
         User user = UserTestDataFactory.createUser();
 
@@ -209,8 +224,32 @@ public class UserControllerTest extends AbstractIntegrationTest {
 
     @Test
     @DisplayName("deactivate should return 404 when user not found")
+    @WithMockCustomUser(role = "ROLE_ADMIN")
     void deactivate_shouldReturn404WhenUserNotFound() throws Exception {
         mockMvc.perform(patch("/api/users/{id}/deactivate", UUID.randomUUID()))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("user can access own data")
+    @WithMockCustomUser(email = "owner@example.com")
+    void user_CanAccessOwnData() throws Exception {
+        User user = UserTestDataFactory.createUser();
+        user.setEmail("owner@example.com");
+
+        User savedUser = userRepository.save(user);
+
+        mockMvc.perform(get("/api/users/{id}", savedUser.getId()))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("user cannot access another user data")
+    @WithMockCustomUser
+    void user_CannotAccessAnotherUserData() throws Exception {
+        User anotherUser = userRepository.save(UserTestDataFactory.createUser());
+
+        mockMvc.perform(get("/api/users/{id}", anotherUser.getId()))
+                .andExpect(status().isForbidden());
     }
 }
