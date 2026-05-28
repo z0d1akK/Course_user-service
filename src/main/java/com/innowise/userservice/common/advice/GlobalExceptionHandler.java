@@ -4,9 +4,11 @@ import com.innowise.userservice.common.dto.field.ValidationErrorField;
 import com.innowise.userservice.common.dto.response.ApiErrorResponse;
 import com.innowise.userservice.common.dto.response.ValidationErrorResponse;
 import com.innowise.userservice.common.exception.BusinessException;
+import com.innowise.userservice.common.exception.ErrorMessages;
 import com.innowise.userservice.common.exception.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -60,6 +62,18 @@ public class GlobalExceptionHandler {
                         .build();
 
         return ResponseEntity.badRequest().body(response);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ApiErrorResponse> handleAccessDenied(AccessDeniedException ex) {
+        ApiErrorResponse response = ApiErrorResponse.builder()
+                .status(HttpStatus.FORBIDDEN.value())
+                .error(HttpStatus.FORBIDDEN.getReasonPhrase())
+                .message(ErrorMessages.FORBIDDEN)
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
 
     @ExceptionHandler(Exception.class)
