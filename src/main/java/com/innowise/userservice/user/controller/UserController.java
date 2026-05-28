@@ -12,7 +12,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -33,12 +32,10 @@ public class UserController {
     private final UserService userService;
 
     @Operation(summary = "Create user", description = "Creates a new user")
-    @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "User successfully created"),
-            @ApiResponse(responseCode = "400", description = "Validation error or business error",
-                    content = @Content(schema = @Schema(implementation = ValidationErrorResponse.class))
-            )
-    })
+    @ApiResponse(responseCode = "201", description = "User successfully created")
+    @ApiResponse(responseCode = "400", description = "Validation error or business error",
+            content = @Content(schema = @Schema(implementation = ValidationErrorResponse.class))
+    )
     @PostMapping
     public ResponseEntity<UserResponseDto> create(@Valid @RequestBody CreateUserRequestDto request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.create(request));
@@ -46,12 +43,10 @@ public class UserController {
 
     @Operation(summary = "Get user by id", description = "Returns full user information")
     @SecurityRequirement(name = "bearerAuth")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "User found"),
-            @ApiResponse(responseCode = "404", description = "User not found",
-                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
-            )
-    })
+    @ApiResponse(responseCode = "200", description = "User found")
+    @ApiResponse(responseCode = "404", description = "User not found",
+            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+    )
     @PreAuthorize("@ownershipService.isOwnerOrAdmin(#id)")
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDto> getById(@PathVariable UUID id) {
@@ -60,12 +55,10 @@ public class UserController {
 
     @Operation(summary = "Get user by id in short format", description = "Returns short user information")
     @SecurityRequirement(name = "bearerAuth")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "User found"),
-            @ApiResponse(responseCode = "404", description = "User not found",
-                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
-            )
-    })
+    @ApiResponse(responseCode = "200", description = "User found")
+    @ApiResponse(responseCode = "404", description = "User not found",
+            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+    )
     @PreAuthorize("@ownershipService.isOwnerOrAdmin(#id)")
     @GetMapping("/{id}/short")
     public ResponseEntity<UserShortResponseDto> getShortById(@PathVariable UUID id) {
@@ -75,9 +68,7 @@ public class UserController {
     @Operation(summary = "Get all users in short format",
             description = "Returns paginated list of short users with optional filtering")
     @SecurityRequirement(name = "bearerAuth")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Short users successfully retrieved")
-    })
+    @ApiResponse(responseCode = "200", description = "Short users successfully retrieved")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @GetMapping("/short")
     public ResponseEntity<Page<UserShortResponseDto>> getAllShort(UserFilterRequestDto filter,
@@ -88,9 +79,7 @@ public class UserController {
     @Operation(summary = "Get all users",
             description = "Returns paginated list of users with optional filtering")
     @SecurityRequirement(name = "bearerAuth")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Users successfully retrieved")
-    })
+    @ApiResponse(responseCode = "200", description = "Users successfully retrieved")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @GetMapping
     public ResponseEntity<Page<UserResponseDto>> getAll(UserFilterRequestDto filter,
@@ -100,15 +89,13 @@ public class UserController {
 
     @Operation(summary = "Update user", description = "Updates existing user information")
     @SecurityRequirement(name = "bearerAuth")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "User successfully updated"),
-            @ApiResponse(responseCode = "404", description = "User not found",
-                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
-            ),
-            @ApiResponse(responseCode = "400", description = "Validation error",
-                    content = @Content(schema = @Schema(implementation = ValidationErrorResponse.class))
-            )
-    })
+    @ApiResponse(responseCode = "200", description = "User successfully updated")
+    @ApiResponse(responseCode = "404", description = "User not found",
+            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+    )
+    @ApiResponse(responseCode = "400", description = "Validation error",
+            content = @Content(schema = @Schema(implementation = ValidationErrorResponse.class))
+    )
     @PreAuthorize("@ownershipService.isOwnerOrAdmin(#id)")
     @PatchMapping("/{id}")
     public ResponseEntity<UserResponseDto> update(@PathVariable UUID id,
@@ -118,12 +105,10 @@ public class UserController {
 
     @Operation(summary = "Activate user")
     @SecurityRequirement(name = "bearerAuth")
-    @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "User activated"),
-            @ApiResponse(responseCode = "404", description = "User not found",
-                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
-            )
-    })
+    @ApiResponse(responseCode = "204", description = "User activated")
+    @ApiResponse(responseCode = "404", description = "User not found",
+            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+    )
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PatchMapping("/{id}/activate")
     public ResponseEntity<Void> activate(@PathVariable UUID id) {
@@ -133,12 +118,10 @@ public class UserController {
 
     @Operation(summary = "Deactivate user")
     @SecurityRequirement(name = "bearerAuth")
-    @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "User deactivated"),
-            @ApiResponse(responseCode = "404", description = "User not found",
-                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
-            )
-    })
+    @ApiResponse(responseCode = "204", description = "User deactivated")
+    @ApiResponse(responseCode = "404", description = "User not found",
+            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+    )
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PatchMapping("/{id}/deactivate")
     public ResponseEntity<Void> deactivate(@PathVariable UUID id) {
@@ -148,12 +131,10 @@ public class UserController {
 
     @Operation(summary = "Delete user", description = "Deletes user by id with all related payment cards")
     @SecurityRequirement(name = "bearerAuth")
-    @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "User successfully deleted"),
-            @ApiResponse(responseCode = "404", description = "User not found",
-                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
-            )
-    })
+    @ApiResponse(responseCode = "204", description = "User successfully deleted")
+    @ApiResponse(responseCode = "404", description = "User not found",
+            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+    )
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {

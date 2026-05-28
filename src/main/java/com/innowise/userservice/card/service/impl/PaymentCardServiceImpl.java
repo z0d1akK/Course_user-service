@@ -25,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -92,7 +91,7 @@ public class PaymentCardServiceImpl implements PaymentCardService {
         validateUserExists(userId);
         return paymentCardRepository.findAllByUserId(userId).stream()
                 .map(paymentCardMapper::toShortResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -106,7 +105,7 @@ public class PaymentCardServiceImpl implements PaymentCardService {
         validateUserExists(userId);
         return paymentCardRepository.findAllByUserId(userId).stream()
                 .map(paymentCardMapper::toResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
