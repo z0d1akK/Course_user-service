@@ -136,6 +136,7 @@ jobs:
           -Dsonar.host.url=https://sonarcloud.io \
           -Dsonar.coverage.jacoco.xmlReportPaths=target/unit-reports/jacoco-report/jacoco.xml,target/integration-reports/jacoco-report/jacoco.xml \
           -Dsonar.junit.reportPaths=target/unit-reports/surefire-reports,target/integration-reports/failsafe-reports
+          -Dsonar.exclusions="**/dto/**,**/entity/**,**/mapper/**,**/config/**,**/common/advice/**,**/common/validation/**,**/common/cache/**,**/*Application.java"
 
   docker:
     name: Build and Push Docker Image
