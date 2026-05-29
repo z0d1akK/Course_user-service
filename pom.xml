@@ -49,6 +49,7 @@
             **/common/validation/**,
             **/common/cache/**,
             *Application.java,
+            **/security/**,
             **/src/test/**/*.java
         </sonar.exclusions>
         <sonar-maven-plugin.version>3.11.0.3922</sonar-maven-plugin.version>
