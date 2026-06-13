@@ -75,6 +75,8 @@ jobs:
           cache: maven
 
       - name: Run integration tests
+        env:
+          INTERNAL_API_KEY: ${{ secrets.INTERNAL_API_KEY }}
         run: mvn verify -Pintegration-tests
 
       - name: Upload integration test reports
