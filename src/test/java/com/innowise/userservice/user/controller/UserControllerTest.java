@@ -2,7 +2,6 @@ package com.innowise.userservice.user.controller;
 
 import com.innowise.userservice.common.AbstractIntegrationTest;
 import com.innowise.userservice.common.annotation.WithMockCustomUser;
-import com.innowise.userservice.user.dto.request.CreateUserRequestDto;
 import com.innowise.userservice.user.dto.request.UpdateUserRequestDto;
 import com.innowise.userservice.user.entity.User;
 import com.innowise.userservice.user.repository.UserRepository;
@@ -20,7 +19,6 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -32,20 +30,6 @@ class UserControllerTest extends AbstractIntegrationTest {
     @BeforeEach
     void setUp() {
         userRepository.deleteAll();
-    }
-
-    @Test
-    @DisplayName("create should create user successfully")
-    void create_shouldCreateUserSuccessfully() throws Exception {
-        CreateUserRequestDto request = UserTestDataFactory.createUserRequest();
-
-        mockMvc.perform(post("/api/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.email").value(request.getEmail()))
-                .andExpect(jsonPath("$.name").value(request.getName()))
-                .andExpect(jsonPath("$.surname").value(request.getSurname()));
     }
 
     @Test

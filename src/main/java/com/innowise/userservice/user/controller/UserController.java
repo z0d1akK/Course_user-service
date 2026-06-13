@@ -2,7 +2,6 @@ package com.innowise.userservice.user.controller;
 
 import com.innowise.userservice.common.dto.response.ApiErrorResponse;
 import com.innowise.userservice.common.dto.response.ValidationErrorResponse;
-import com.innowise.userservice.user.dto.request.CreateUserRequestDto;
 import com.innowise.userservice.user.dto.request.UpdateUserRequestDto;
 import com.innowise.userservice.user.dto.request.UserFilterRequestDto;
 import com.innowise.userservice.user.dto.response.UserResponseDto;
@@ -17,7 +16,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -30,16 +28,6 @@ import java.util.UUID;
 public class UserController {
 
     private final UserService userService;
-
-    @Operation(summary = "Create user", description = "Creates a new user")
-    @ApiResponse(responseCode = "201", description = "User successfully created")
-    @ApiResponse(responseCode = "400", description = "Validation error or business error",
-            content = @Content(schema = @Schema(implementation = ValidationErrorResponse.class))
-    )
-    @PostMapping
-    public ResponseEntity<UserResponseDto> create(@Valid @RequestBody CreateUserRequestDto request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(userService.create(request));
-    }
 
     @Operation(summary = "Get user by id", description = "Returns full user information")
     @SecurityRequirement(name = "bearerAuth")

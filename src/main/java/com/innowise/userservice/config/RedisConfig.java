@@ -38,7 +38,8 @@ public class RedisConfig {
                 .serializeValuesWith(
                         RedisSerializationContext.SerializationPair
                                 .fromSerializer(new GenericJackson2JsonRedisSerializer(objectMapper))
-                );
+                )
+                .prefixCacheNameWith("user-service:");
         return RedisCacheManager.builder(cf).cacheDefaults(cfg).build();
     }
 }
