@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -40,7 +39,6 @@ public class UserInternalController {
     }
 
     @Operation(summary = "Delete user", description = "Deletes user by id with all related payment cards")
-    @SecurityRequirement(name = "bearerAuth")
     @ApiResponse(responseCode = "204", description = "User successfully deleted")
     @ApiResponse(responseCode = "404", description = "User not found",
             content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))

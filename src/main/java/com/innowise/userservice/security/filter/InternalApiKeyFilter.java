@@ -22,6 +22,14 @@ public class InternalApiKeyFilter extends OncePerRequestFilter {
 
     public static final String MISSING_INTERNAL_API_KEY = "{\"error\": \"Invalid or missing internal API key\"}";
 
+    public static final String INTERNAL_HEADER = "X-Internal-Key";
+
+    public static final String INTERNAL_SERVICE_ROLE = "ROLE_INTERNAL_SERVICE";
+
+    public static final String INTERNAL_SERVICE_PRINCIPAL = "internal-service";
+
+    public static final String INTERNAL_USERS_PATH = "/internal/users";
+
     @Value("${internal.api-key}")
     private String validInternalApiKey;
 
@@ -30,14 +38,14 @@ public class InternalApiKeyFilter extends OncePerRequestFilter {
 
         String path = request.getRequestURI();
 
-        if (path.startsWith("/internal/users")) {
-            String providedKey = request.getHeader("X-Internal-Key");
+        if (path.startsWith(INTERNAL_USERS_PATH)) {
+            String providedKey = request.getHeader(INTERNAL_HEADER);
 
             if (validInternalApiKey != null && validInternalApiKey.equals(providedKey)) {
                 Authentication authentication = new UsernamePasswordAuthenticationToken(
-                        "internal-service",
+                        INTERNAL_SERVICE_PRINCIPAL,
                         null,
-                        List.of(new SimpleGrantedAuthority("ROLE_INTERNAL_SERVICE"))
+                        List.of(new SimpleGrantedAuthority(INTERNAL_SERVICE_ROLE))
                 );
                 SecurityContextHolder.getContext().setAuthentication(authentication);
                 filterChain.doFilter(request, response);
