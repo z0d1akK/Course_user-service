@@ -1,5 +1,6 @@
 package com.innowise.userservice.security.filter;
 
+import com.innowise.userservice.common.constants.Headers;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,8 +23,6 @@ public class InternalApiKeyFilter extends OncePerRequestFilter {
 
     public static final String MISSING_INTERNAL_API_KEY = "{\"error\": \"Invalid or missing internal API key\"}";
 
-    public static final String INTERNAL_HEADER = "X-Internal-Key";
-
     public static final String INTERNAL_SERVICE_ROLE = "ROLE_INTERNAL_SERVICE";
 
     public static final String INTERNAL_SERVICE_PRINCIPAL = "internal-service";
@@ -39,7 +38,7 @@ public class InternalApiKeyFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
 
         if (path.startsWith(INTERNAL_USERS_PATH)) {
-            String providedKey = request.getHeader(INTERNAL_HEADER);
+            String providedKey = request.getHeader(Headers.INTERNAL_KEY);
 
             if (validInternalApiKey != null && validInternalApiKey.equals(providedKey)) {
                 Authentication authentication = new UsernamePasswordAuthenticationToken(

@@ -1,7 +1,7 @@
 package com.innowise.userservice.security.config;
 
+import com.innowise.userservice.security.filter.GatewayAuthenticationFilter;
 import com.innowise.userservice.security.filter.InternalApiKeyFilter;
-import com.innowise.userservice.security.filter.JwtAuthenticationFilter;
 import com.innowise.userservice.security.handler.CustomAccessDeniedHandler;
 import com.innowise.userservice.security.handler.CustomAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +21,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final GatewayAuthenticationFilter gatewayAuthenticationFilter;
 
     private final InternalApiKeyFilter internalApiKeyFilter;
 
@@ -63,7 +63,7 @@ public class SecurityConfig {
                         .accessDeniedHandler(new CustomAccessDeniedHandler())
                 )
                 .addFilterBefore(
-                        jwtAuthenticationFilter,
+                        gatewayAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class
                 )
                 .build();
