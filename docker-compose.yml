@@ -22,8 +22,9 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_HOST_PORT: ${POSTGRES_HOST_PORT}
 
-      REDIS_HOST: redis
+      REDIS_DOCKER_HOST: ${REDIS_DOCKER_HOST}
       REDIS_PORT: ${REDIS_PORT}
 
       INTERNAL_API_KEY: ${INTERNAL_API_KEY}
@@ -52,7 +53,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
 
     ports:
-      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+      - "${POSTGRES_HOST_PORT}:${POSTGRES_PORT}"
 
     command: -p ${POSTGRES_PORT}
 
@@ -97,3 +98,4 @@ volumes:
 networks:
   user-service-network:
     driver: bridge
+    name: user-service-network
