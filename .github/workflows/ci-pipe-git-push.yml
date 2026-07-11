@@ -77,6 +77,7 @@ jobs:
       - name: Run integration tests
         env:
           INTERNAL_API_KEY: ${{ secrets.INTERNAL_API_KEY }}
+          GATEWAY_API_KEY: ${{ secrets.GATEWAY_API_KEY }}
         run: mvn verify -Pintegration-tests
 
       - name: Upload integration test reports
