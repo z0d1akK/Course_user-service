@@ -1,5 +1,6 @@
 package com.innowise.userservice.security.config;
 
+import com.innowise.userservice.security.filter.GatewayApiKeyFilter;
 import com.innowise.userservice.security.filter.GatewayAuthenticationFilter;
 import com.innowise.userservice.security.filter.InternalApiKeyFilter;
 import com.innowise.userservice.security.handler.CustomAccessDeniedHandler;
@@ -24,6 +25,8 @@ public class SecurityConfig {
     private final GatewayAuthenticationFilter gatewayAuthenticationFilter;
 
     private final InternalApiKeyFilter internalApiKeyFilter;
+
+    private final GatewayApiKeyFilter gatewayApiKeyFilter;
 
     @Bean
     @Order(1)
@@ -64,8 +67,12 @@ public class SecurityConfig {
                         .accessDeniedHandler(new CustomAccessDeniedHandler())
                 )
                 .addFilterBefore(
-                        gatewayAuthenticationFilter,
+                        gatewayApiKeyFilter,
                         UsernamePasswordAuthenticationFilter.class
+                )
+                .addFilterAfter(
+                        gatewayAuthenticationFilter,
+                        GatewayApiKeyFilter.class
                 )
                 .build();
     }

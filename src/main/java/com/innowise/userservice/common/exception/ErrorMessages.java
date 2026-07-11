@@ -16,4 +16,6 @@ public class ErrorMessages {
     public static final String UNAUTHORIZED = "Unauthorized";
 
     public static final String FORBIDDEN = "Access denied";
+
+    public static final String INVALID_GATEWAY_KEY = "Invalid Gateway Key";
 }

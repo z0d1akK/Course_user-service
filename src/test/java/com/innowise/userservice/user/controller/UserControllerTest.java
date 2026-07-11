@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 
 import java.util.UUID;
@@ -27,6 +28,9 @@ class UserControllerTest extends AbstractIntegrationTest {
     @Autowired
     private UserRepository userRepository;
 
+    @Value("${gateway.api-key}")
+    private String gatewayApiKey;
+
     @BeforeEach
     void setUp() {
         userRepository.deleteAll();
@@ -38,7 +42,8 @@ class UserControllerTest extends AbstractIntegrationTest {
     void getById_shouldReturnUserSuccessfully() throws Exception {
         User user = userRepository.save(UserTestDataFactory.createUser());
 
-        mockMvc.perform(get("/api/users/{id}", user.getId()))
+        mockMvc.perform(get("/api/users/{id}", user.getId())
+                        .header("X-Gateway-Key", gatewayApiKey))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(user.getId().toString()))
                 .andExpect(jsonPath("$.email").value(user.getEmail()));
@@ -48,7 +53,8 @@ class UserControllerTest extends AbstractIntegrationTest {
     @DisplayName("getById should return 404 when user not found")
     @WithMockCustomUser(role = "ROLE_ADMIN")
     void getById_shouldReturn404WhenUserNotFound() throws Exception {
-        mockMvc.perform(get("/api/users/{id}", UUID.randomUUID()))
+        mockMvc.perform(get("/api/users/{id}", UUID.randomUUID())
+                        .header("X-Gateway-Key", gatewayApiKey))
                 .andExpect(status().isNotFound());
     }
 
@@ -58,7 +64,8 @@ class UserControllerTest extends AbstractIntegrationTest {
     void getShortById_shouldReturnShortUserSuccessfully() throws Exception {
         User user = userRepository.save(UserTestDataFactory.createUser());
 
-        mockMvc.perform(get("/api/users/{id}/short", user.getId()))
+        mockMvc.perform(get("/api/users/{id}/short", user.getId())
+                        .header("X-Gateway-Key", gatewayApiKey))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(user.getId().toString()))
                 .andExpect(jsonPath("$.email").value(user.getEmail()));
@@ -68,7 +75,8 @@ class UserControllerTest extends AbstractIntegrationTest {
     @DisplayName("getShortById should return 404 when user not found")
     @WithMockCustomUser(role = "ROLE_ADMIN")
     void getShortById_shouldReturn404WhenUserNotFound() throws Exception {
-        mockMvc.perform(get("/api/users/{id}/short", UUID.randomUUID()))
+        mockMvc.perform(get("/api/users/{id}/short", UUID.randomUUID())
+                        .header("X-Gateway-Key", gatewayApiKey))
                 .andExpect(status().isNotFound());
     }
 
@@ -78,7 +86,7 @@ class UserControllerTest extends AbstractIntegrationTest {
     void getAll_shouldReturnUsersPage() throws Exception {
         userRepository.save(UserTestDataFactory.createUser());
 
-        mockMvc.perform(get("/api/users"))
+        mockMvc.perform(get("/api/users").header("X-Gateway-Key", gatewayApiKey))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(1)));
     }
@@ -89,7 +97,7 @@ class UserControllerTest extends AbstractIntegrationTest {
     void getAllShort_shouldReturnShortUsersPage() throws Exception {
         userRepository.save(UserTestDataFactory.createUser());
 
-        mockMvc.perform(get("/api/users/short"))
+        mockMvc.perform(get("/api/users/short").header("X-Gateway-Key", gatewayApiKey))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(1)));
     }
@@ -103,6 +111,7 @@ class UserControllerTest extends AbstractIntegrationTest {
         UpdateUserRequestDto request = UserTestDataFactory.updateUserRequest();
 
         mockMvc.perform(patch("/api/users/{id}", user.getId())
+                        .header("X-Gateway-Key", gatewayApiKey)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -122,6 +131,7 @@ class UserControllerTest extends AbstractIntegrationTest {
         UpdateUserRequestDto request = UserTestDataFactory.updateUserRequest();
 
         mockMvc.perform(patch("/api/users/{id}", UUID.randomUUID())
+                        .header("X-Gateway-Key", gatewayApiKey)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound());
@@ -139,6 +149,7 @@ class UserControllerTest extends AbstractIntegrationTest {
                 .build();
 
         mockMvc.perform(patch("/api/users/{id}", user.getId())
+                        .header("X-Gateway-Key", gatewayApiKey)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -151,7 +162,8 @@ class UserControllerTest extends AbstractIntegrationTest {
     void delete_shouldDeleteUserSuccessfully() throws Exception {
         User user = userRepository.save(UserTestDataFactory.createUser());
 
-        mockMvc.perform(delete("/api/users/{id}", user.getId()))
+        mockMvc.perform(delete("/api/users/{id}", user.getId())
+                        .header("X-Gateway-Key", gatewayApiKey))
                 .andExpect(status().isNoContent());
 
         assertThat(userRepository.existsById(user.getId())).isFalse();
@@ -161,7 +173,8 @@ class UserControllerTest extends AbstractIntegrationTest {
     @DisplayName("delete should return 404 when user not found")
     @WithMockCustomUser(role = "ROLE_ADMIN")
     void delete_shouldReturn404WhenUserNotFound() throws Exception {
-        mockMvc.perform(delete("/api/users/{id}", UUID.randomUUID()))
+        mockMvc.perform(delete("/api/users/{id}", UUID.randomUUID())
+                        .header("X-Gateway-Key", gatewayApiKey))
                 .andExpect(status().isNotFound());
     }
 
@@ -174,7 +187,8 @@ class UserControllerTest extends AbstractIntegrationTest {
 
         User savedUser = userRepository.save(user);
 
-        mockMvc.perform(patch("/api/users/{id}/activate", savedUser.getId()))
+        mockMvc.perform(patch("/api/users/{id}/activate", savedUser.getId())
+                        .header("X-Gateway-Key", gatewayApiKey))
                 .andExpect(status().isNoContent());
 
         User updatedUser = userRepository.findById(savedUser.getId()).orElseThrow();
@@ -186,7 +200,8 @@ class UserControllerTest extends AbstractIntegrationTest {
     @DisplayName("activate should return 404 when user not found")
     @WithMockCustomUser(role = "ROLE_ADMIN")
     void activate_shouldReturn404WhenUserNotFound() throws Exception {
-        mockMvc.perform(patch("/api/users/{id}/activate", UUID.randomUUID()))
+        mockMvc.perform(patch("/api/users/{id}/activate", UUID.randomUUID())
+                        .header("X-Gateway-Key", gatewayApiKey))
                 .andExpect(status().isNotFound());
     }
 
@@ -198,7 +213,8 @@ class UserControllerTest extends AbstractIntegrationTest {
 
         User savedUser = userRepository.save(user);
 
-        mockMvc.perform(patch("/api/users/{id}/deactivate", savedUser.getId()))
+        mockMvc.perform(patch("/api/users/{id}/deactivate", savedUser.getId())
+                        .header("X-Gateway-Key", gatewayApiKey))
                 .andExpect(status().isNoContent());
 
         User updatedUser = userRepository.findById(savedUser.getId()).orElseThrow();
@@ -210,7 +226,8 @@ class UserControllerTest extends AbstractIntegrationTest {
     @DisplayName("deactivate should return 404 when user not found")
     @WithMockCustomUser(role = "ROLE_ADMIN")
     void deactivate_shouldReturn404WhenUserNotFound() throws Exception {
-        mockMvc.perform(patch("/api/users/{id}/deactivate", UUID.randomUUID()))
+        mockMvc.perform(patch("/api/users/{id}/deactivate", UUID.randomUUID())
+                        .header("X-Gateway-Key", gatewayApiKey))
                 .andExpect(status().isNotFound());
     }
 
@@ -223,7 +240,8 @@ class UserControllerTest extends AbstractIntegrationTest {
 
         User savedUser = userRepository.save(user);
 
-        mockMvc.perform(get("/api/users/{id}", savedUser.getId()))
+        mockMvc.perform(get("/api/users/{id}", savedUser.getId())
+                        .header("X-Gateway-Key", gatewayApiKey))
                 .andExpect(status().isForbidden());
     }
 
@@ -233,7 +251,8 @@ class UserControllerTest extends AbstractIntegrationTest {
     void user_CannotAccessAnotherUserData() throws Exception {
         User anotherUser = userRepository.save(UserTestDataFactory.createUser());
 
-        mockMvc.perform(get("/api/users/{id}", anotherUser.getId()))
+        mockMvc.perform(get("/api/users/{id}", anotherUser.getId())
+                        .header("X-Gateway-Key", gatewayApiKey))
                 .andExpect(status().isForbidden());
     }
 }

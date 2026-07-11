@@ -14,6 +14,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 
 import java.util.UUID;
@@ -35,6 +36,9 @@ class PaymentCardControllerTest extends AbstractIntegrationTest {
     @Autowired
     private UserRepository userRepository;
 
+    @Value("${gateway.api-key}")
+    private String gatewayApiKey;
+
     @BeforeEach
     void setUp() {
         paymentCardRepository.deleteAll();
@@ -50,6 +54,7 @@ class PaymentCardControllerTest extends AbstractIntegrationTest {
         CreatePaymentCardRequestDto request = PaymentCardTestDataFactory.createPaymentCardRequest();
 
         mockMvc.perform(post("/api/users/{userId}/payment-cards", user.getId())
+                        .header("X-Gateway-Key", gatewayApiKey)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -65,6 +70,7 @@ class PaymentCardControllerTest extends AbstractIntegrationTest {
         CreatePaymentCardRequestDto request = PaymentCardTestDataFactory.createPaymentCardRequest();
 
         mockMvc.perform(post("/api/users/{userId}/payment-cards", UUID.randomUUID())
+                        .header("X-Gateway-Key", gatewayApiKey)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound());
@@ -83,6 +89,7 @@ class PaymentCardControllerTest extends AbstractIntegrationTest {
                         .build();
 
         mockMvc.perform(post("/api/users/{userId}/payment-cards", user.getId())
+                        .header("X-Gateway-Key", gatewayApiKey)
                         .param("userId", user.getId().toString())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -99,7 +106,8 @@ class PaymentCardControllerTest extends AbstractIntegrationTest {
 
         PaymentCard savedCard = paymentCardRepository.save(card);
 
-        mockMvc.perform(get("/api/payment-cards/{id}", savedCard.getId()))
+        mockMvc.perform(get("/api/payment-cards/{id}", savedCard.getId())
+                        .header("X-Gateway-Key", gatewayApiKey))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(savedCard.getId().toString()))
                 .andExpect(jsonPath("$.number").value(savedCard.getNumber()));
@@ -109,7 +117,8 @@ class PaymentCardControllerTest extends AbstractIntegrationTest {
     @DisplayName("getById should return 404 when payment card not found")
     @WithMockCustomUser(role = "ROLE_ADMIN")
     void getById_shouldReturn404WhenPaymentCardNotFound() throws Exception {
-        mockMvc.perform(get("/api/payment-cards/{id}", UUID.randomUUID()))
+        mockMvc.perform(get("/api/payment-cards/{id}", UUID.randomUUID())
+                        .header("X-Gateway-Key", gatewayApiKey))
                 .andExpect(status().isNotFound());
     }
 
@@ -123,7 +132,8 @@ class PaymentCardControllerTest extends AbstractIntegrationTest {
 
         PaymentCard savedCard = paymentCardRepository.save(card);
 
-        mockMvc.perform(get("/api/payment-cards/{id}/short", savedCard.getId()))
+        mockMvc.perform(get("/api/payment-cards/{id}/short", savedCard.getId())
+                        .header("X-Gateway-Key", gatewayApiKey))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(savedCard.getId().toString()))
                 .andExpect(jsonPath("$.number").value(savedCard.getNumber()));
@@ -133,7 +143,8 @@ class PaymentCardControllerTest extends AbstractIntegrationTest {
     @DisplayName("getShortById should return 404 when payment card not found")
     @WithMockCustomUser(role = "ROLE_ADMIN")
     void getShortById_shouldReturn404WhenPaymentCardNotFound() throws Exception {
-        mockMvc.perform(get("/api/payment-cards/{id}/short", UUID.randomUUID()))
+        mockMvc.perform(get("/api/payment-cards/{id}/short", UUID.randomUUID())
+                        .header("X-Gateway-Key", gatewayApiKey))
                 .andExpect(status().isNotFound());
     }
 
@@ -145,7 +156,8 @@ class PaymentCardControllerTest extends AbstractIntegrationTest {
 
         paymentCardRepository.save(PaymentCardTestDataFactory.createPaymentCard(user));
 
-        mockMvc.perform(get("/api/payment-cards"))
+        mockMvc.perform(get("/api/payment-cards")
+                        .header("X-Gateway-Key", gatewayApiKey))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(1)));
     }
@@ -158,7 +170,8 @@ class PaymentCardControllerTest extends AbstractIntegrationTest {
 
         paymentCardRepository.save(PaymentCardTestDataFactory.createPaymentCard(user));
 
-        mockMvc.perform(get("/api/payment-cards/short"))
+        mockMvc.perform(get("/api/payment-cards/short")
+                        .header("X-Gateway-Key", gatewayApiKey))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(1)));
     }
@@ -171,7 +184,8 @@ class PaymentCardControllerTest extends AbstractIntegrationTest {
 
         paymentCardRepository.save(PaymentCardTestDataFactory.createPaymentCard(user));
 
-        mockMvc.perform(get("/api/users/{userId}/payment-cards", user.getId()))
+        mockMvc.perform(get("/api/users/{userId}/payment-cards", user.getId())
+                        .header("X-Gateway-Key", gatewayApiKey))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)));
     }
@@ -180,7 +194,8 @@ class PaymentCardControllerTest extends AbstractIntegrationTest {
     @DisplayName("getAllByUserId should return 404 when user not found")
     @WithMockCustomUser(role = "ROLE_ADMIN")
     void getAllByUserId_shouldReturn404WhenUserNotFound() throws Exception {
-        mockMvc.perform(get("/api/users/{userId}/payment-cards", UUID.randomUUID()))
+        mockMvc.perform(get("/api/users/{userId}/payment-cards", UUID.randomUUID())
+                        .header("X-Gateway-Key", gatewayApiKey))
                 .andExpect(status().isNotFound());
     }
 
@@ -192,7 +207,8 @@ class PaymentCardControllerTest extends AbstractIntegrationTest {
 
         paymentCardRepository.save(PaymentCardTestDataFactory.createPaymentCard(user));
 
-        mockMvc.perform(get("/api/users/{userId}/payment-cards/short", user.getId()))
+        mockMvc.perform(get("/api/users/{userId}/payment-cards/short", user.getId())
+                        .header("X-Gateway-Key", gatewayApiKey))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)));
     }
@@ -201,7 +217,8 @@ class PaymentCardControllerTest extends AbstractIntegrationTest {
     @DisplayName("getAllShortByUserId should return 404 when user not found")
     @WithMockCustomUser(role = "ROLE_ADMIN")
     void getAllShortByUserId_shouldReturn404WhenUserNotFound() throws Exception {
-        mockMvc.perform(get("/api/users/{userId}/payment-cards/short", UUID.randomUUID()))
+        mockMvc.perform(get("/api/users/{userId}/payment-cards/short", UUID.randomUUID())
+                        .header("X-Gateway-Key", gatewayApiKey))
                 .andExpect(status().isNotFound());
     }
 
@@ -216,6 +233,7 @@ class PaymentCardControllerTest extends AbstractIntegrationTest {
         UpdatePaymentCardRequestDto request = PaymentCardTestDataFactory.updatePaymentCardRequest();
 
         mockMvc.perform(patch("/api/payment-cards/{id}", savedCard.getId())
+                        .header("X-Gateway-Key", gatewayApiKey)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -230,6 +248,7 @@ class PaymentCardControllerTest extends AbstractIntegrationTest {
         UpdatePaymentCardRequestDto request = PaymentCardTestDataFactory.updatePaymentCardRequest();
 
         mockMvc.perform(patch("/api/payment-cards/{id}", UUID.randomUUID())
+                        .header("X-Gateway-Key", gatewayApiKey)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound());
@@ -250,6 +269,7 @@ class PaymentCardControllerTest extends AbstractIntegrationTest {
                 .build();
 
         mockMvc.perform(patch("/api/payment-cards/{id}", savedCard.getId())
+                        .header("X-Gateway-Key", gatewayApiKey)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -267,7 +287,8 @@ class PaymentCardControllerTest extends AbstractIntegrationTest {
 
         PaymentCard savedCard = paymentCardRepository.save(card);
 
-        mockMvc.perform(patch("/api/payment-cards/{id}/activate", savedCard.getId()))
+        mockMvc.perform(patch("/api/payment-cards/{id}/activate", savedCard.getId())
+                        .header("X-Gateway-Key", gatewayApiKey))
                 .andExpect(status().isNoContent());
 
         PaymentCard updatedCard = paymentCardRepository.findById(savedCard.getId()).orElseThrow();
@@ -279,7 +300,8 @@ class PaymentCardControllerTest extends AbstractIntegrationTest {
     @DisplayName("activate should return 404 when payment card not found")
     @WithMockCustomUser(role = "ROLE_ADMIN")
     void activate_shouldReturn404WhenPaymentCardNotFound() throws Exception {
-        mockMvc.perform(patch("/api/payment-cards/{id}/activate", UUID.randomUUID()))
+        mockMvc.perform(patch("/api/payment-cards/{id}/activate", UUID.randomUUID())
+                        .header("X-Gateway-Key", gatewayApiKey))
                 .andExpect(status().isNotFound());
     }
 
@@ -291,7 +313,8 @@ class PaymentCardControllerTest extends AbstractIntegrationTest {
 
         PaymentCard savedCard = paymentCardRepository.save(PaymentCardTestDataFactory.createPaymentCard(user));
 
-        mockMvc.perform(patch("/api/payment-cards/{id}/deactivate", savedCard.getId()))
+        mockMvc.perform(patch("/api/payment-cards/{id}/deactivate", savedCard.getId())
+                        .header("X-Gateway-Key", gatewayApiKey))
                 .andExpect(status().isNoContent());
 
         PaymentCard updatedCard = paymentCardRepository.findById(savedCard.getId()).orElseThrow();
@@ -303,7 +326,8 @@ class PaymentCardControllerTest extends AbstractIntegrationTest {
     @DisplayName("deactivate should return 404 when payment card not found")
     @WithMockCustomUser(role = "ROLE_ADMIN")
     void deactivate_shouldReturn404WhenPaymentCardNotFound() throws Exception {
-        mockMvc.perform(patch("/api/payment-cards/{id}/deactivate", UUID.randomUUID()))
+        mockMvc.perform(patch("/api/payment-cards/{id}/deactivate", UUID.randomUUID())
+                        .header("X-Gateway-Key", gatewayApiKey))
                 .andExpect(status().isNotFound());
     }
 
@@ -315,7 +339,8 @@ class PaymentCardControllerTest extends AbstractIntegrationTest {
 
         PaymentCard savedCard = paymentCardRepository.save(PaymentCardTestDataFactory.createPaymentCard(user));
 
-        mockMvc.perform(delete("/api/payment-cards/{id}", savedCard.getId()))
+        mockMvc.perform(delete("/api/payment-cards/{id}", savedCard.getId())
+                        .header("X-Gateway-Key", gatewayApiKey))
                 .andExpect(status().isNoContent());
 
         assertThat(paymentCardRepository.existsById(savedCard.getId())).isFalse();
@@ -325,7 +350,8 @@ class PaymentCardControllerTest extends AbstractIntegrationTest {
     @DisplayName("delete should return 404 when payment card not found")
     @WithMockCustomUser(role = "ROLE_ADMIN")
     void delete_shouldReturn404WhenPaymentCardNotFound() throws Exception {
-        mockMvc.perform(delete("/api/payment-cards/{id}", UUID.randomUUID()))
+        mockMvc.perform(delete("/api/payment-cards/{id}", UUID.randomUUID())
+                        .header("X-Gateway-Key", gatewayApiKey))
                 .andExpect(status().isNotFound());
     }
 }
