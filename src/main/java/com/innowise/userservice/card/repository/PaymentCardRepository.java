@@ -15,4 +15,6 @@ public interface PaymentCardRepository extends JpaRepository<PaymentCard, UUID> 
     long countByUserId(UUID userId);
 
     boolean existsByIdAndUserId(UUID id, UUID userId );
+
+    boolean existsByUserIdAndNumber(UUID userId, String number);
 }

@@ -6,13 +6,16 @@ import com.innowise.userservice.common.dto.response.ValidationErrorResponse;
 import com.innowise.userservice.common.exception.BusinessException;
 import com.innowise.userservice.common.exception.ErrorMessages;
 import com.innowise.userservice.common.exception.ResourceNotFoundException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,11 +28,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ApiErrorResponse> handleNotFound(ResourceNotFoundException ex) {
         ApiErrorResponse response = ApiErrorResponse.builder()
-                        .status(HttpStatus.NOT_FOUND.value())
-                        .error(HttpStatus.NOT_FOUND.getReasonPhrase())
-                        .message(ex.getMessage())
-                        .timestamp(LocalDateTime.now())
-                        .build();
+                .status(HttpStatus.NOT_FOUND.value())
+                .error(HttpStatus.NOT_FOUND.getReasonPhrase())
+                .message(ex.getMessage())
+                .timestamp(LocalDateTime.now())
+                .build();
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
@@ -37,29 +40,98 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ApiErrorResponse> handleBusiness(BusinessException ex) {
         ApiErrorResponse response = ApiErrorResponse.builder()
-                        .status(HttpStatus.BAD_REQUEST.value())
-                        .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
-                        .message(ex.getMessage())
-                        .timestamp(LocalDateTime.now())
-                        .build();
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
+                .message(ex.getMessage())
+                .timestamp(LocalDateTime.now())
+                .build();
 
         return ResponseEntity.badRequest().body(response);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiErrorResponse> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+        String message = "Data integrity violation occurred";
+
+        if (ex.getMessage() != null) {
+            if (ex.getMessage().contains("uq_payment_cards_user_number")) {
+                message = "Payment card with this number already exists for this user";
+            } else if (ex.getMessage().contains("maximum cards limit") ||
+                    ex.getMessage().contains("check_card_limit")) {
+                message = "Maximum cards limit exceeded for this user";
+            } else if (ex.getMessage().contains("unique constraint")) {
+                message = "Duplicate entry not allowed";
+            }
+        }
+
+        ApiErrorResponse response = ApiErrorResponse.builder()
+                .status(HttpStatus.CONFLICT.value())
+                .error(HttpStatus.CONFLICT.getReasonPhrase())
+                .message(message)
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ValidationErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
         List<ValidationErrorField> errors = ex.getBindingResult()
-                        .getFieldErrors()
-                        .stream()
-                        .map(this::mapFieldError)
-                        .toList();
+                .getFieldErrors()
+                .stream()
+                .map(this::mapFieldError)
+                .toList();
 
         ValidationErrorResponse response = ValidationErrorResponse.builder()
-                        .status(HttpStatus.BAD_REQUEST.value())
-                        .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
-                        .errors(errors)
-                        .timestamp(LocalDateTime.now())
-                        .build();
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
+                .errors(errors)
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ApiErrorResponse> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        String message = String.format("Invalid value '%s' for parameter '%s'. Expected type: %s",
+                ex.getValue(),
+                ex.getName(),
+                ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "unknown");
+
+        ApiErrorResponse response = ApiErrorResponse.builder()
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
+                .message(message)
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiErrorResponse> handleMessageNotReadable(HttpMessageNotReadableException ex) {
+        String message = "Malformed JSON request or invalid data format";
+
+        if (ex.getCause() != null && ex.getCause().getMessage() != null) {
+            String causeMessage = ex.getCause().getMessage();
+            if (causeMessage.contains("LocalDate")) {
+                message = "Invalid date format. Please use format: YYYY-MM-DD";
+            } else if (causeMessage.contains("UUID")) {
+                message = "Invalid UUID format";
+            } else if (causeMessage.contains("LocalDateTime")) {
+                message = "Invalid date-time format. Please use ISO format";
+            } else {
+                message = "Invalid request body: " + causeMessage;
+            }
+        }
+
+        ApiErrorResponse response = ApiErrorResponse.builder()
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
+                .message(message)
+                .timestamp(LocalDateTime.now())
+                .build();
 
         return ResponseEntity.badRequest().body(response);
     }
@@ -79,11 +151,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorResponse> handleInternal(Exception ex) {
         ApiErrorResponse response = ApiErrorResponse.builder()
-                        .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                        .error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase())
-                        .message(INTERNAL_SERVER_ERROR_MESSAGE)
-                        .timestamp(LocalDateTime.now())
-                        .build();
+                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase())
+                .message(INTERNAL_SERVER_ERROR_MESSAGE)
+                .timestamp(LocalDateTime.now())
+                .build();
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }

@@ -43,16 +43,6 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PaymentCard> paymentCards = new ArrayList<>();
 
-    public void addPaymentCard(PaymentCard card) {
-        paymentCards.add(card);
-        card.setUser(this);
-    }
-
-    public void removePaymentCard(PaymentCard card) {
-        paymentCards.remove(card);
-        card.setUser(null);
-    }
-
     @Override
     public final boolean equals(Object o) {
         if (this == o) return true;

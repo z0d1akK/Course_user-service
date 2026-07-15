@@ -6,6 +6,7 @@ import com.innowise.userservice.card.dto.response.PaymentCardResponseDto;
 import com.innowise.userservice.card.dto.response.PaymentCardShortResponseDto;
 import com.innowise.userservice.card.entity.PaymentCard;
 import com.innowise.userservice.card.exception.MaxCardsLimitException;
+import com.innowise.userservice.card.exception.PaymentCardAlreadyExistsException;
 import com.innowise.userservice.card.exception.PaymentCardNotFoundException;
 import com.innowise.userservice.card.mapper.PaymentCardMapper;
 import com.innowise.userservice.card.repository.PaymentCardRepository;
@@ -15,9 +16,9 @@ import com.innowise.userservice.user.entity.User;
 import com.innowise.userservice.user.exception.UserNotFoundException;
 import com.innowise.userservice.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -53,17 +55,16 @@ public class PaymentCardServiceImpl implements PaymentCardService {
 
         if (cardsCount >= MAX_CARDS_COUNT) throw new MaxCardsLimitException(userId);
 
-        PaymentCard paymentCard = paymentCardMapper.toEntity(request);
-
-        user.addPaymentCard(paymentCard);
-
-        try {
-            PaymentCard savedPaymentCard = paymentCardRepository.save(paymentCard);
-
-            return paymentCardMapper.toResponse(savedPaymentCard);
-        } catch (DataIntegrityViolationException e) {
-            throw new MaxCardsLimitException(userId);
+        if (paymentCardRepository.existsByUserIdAndNumber(userId, request.getNumber())) {
+            throw new PaymentCardAlreadyExistsException();
         }
+
+        PaymentCard paymentCard = paymentCardMapper.toEntity(request);
+        paymentCard.setUser(user);
+        paymentCard.setActive(true);
+
+        PaymentCard savedPaymentCard = paymentCardRepository.save(paymentCard);
+        return paymentCardMapper.toResponse(savedPaymentCard);
     }
 
     @Override
@@ -112,7 +113,7 @@ public class PaymentCardServiceImpl implements PaymentCardService {
     @Transactional
     public PaymentCardResponseDto update(UUID id, UpdatePaymentCardRequestDto request) {
         PaymentCard paymentCard = paymentCardRepository.findById(id)
-                        .orElseThrow(() -> new PaymentCardNotFoundException(id));
+                .orElseThrow(() -> new PaymentCardNotFoundException(id));
 
         paymentCardMapper.updateToEntity(request, paymentCard);
 
@@ -153,13 +154,9 @@ public class PaymentCardServiceImpl implements PaymentCardService {
         PaymentCard paymentCard = paymentCardRepository.findById(id)
                 .orElseThrow(() -> new PaymentCardNotFoundException(id));
 
-        User user = paymentCard.getUser();
+        UUID userId = paymentCard.getUser().getId();
 
-        UUID userId = user.getId();
-
-        user.removePaymentCard(paymentCard);
-
-        userRepository.save(user);
+        paymentCardRepository.delete(paymentCard);
 
         evictUserCache(userId);
     }

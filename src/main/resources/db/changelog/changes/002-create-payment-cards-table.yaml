@@ -55,3 +55,8 @@ databaseChangeLog:
                   type: timestamp
                   constraints:
                     nullable: false
+
+        - addUniqueConstraint:
+            tableName: payment_cards
+            columnNames: user_id, number
+            constraintName: uq_payment_cards_user_number
