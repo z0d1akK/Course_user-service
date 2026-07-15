@@ -456,7 +456,7 @@ class PaymentCardServiceImplTest {
         paymentCardService.delete(cardId);
 
         verify(paymentCardRepository).findById(cardId);
-        verify(userRepository).save(user);
+        verify(paymentCardRepository).delete(paymentCard);
         verify(usersCache).evict(user.getId());
         verify(usersShortCache).evict(user.getId());
     }
